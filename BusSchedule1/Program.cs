@@ -62,8 +62,6 @@ namespace BusSchedule1
                 }
             }
 
-           
-
             // Shift preferences
 
             for (byte i = 0; i < 14; i++)
@@ -151,22 +149,32 @@ namespace BusSchedule1
             }
 
             // Not scheduled night shift
-            //TODO: calculate exactly not equal 4 night shifts
             //TODO: For every late shift assigned that is not equal to 4
 
-            for (byte i = 0; i < 14; i++)
+            for (byte j = 0; j < 11; j++)
             {
-                for (byte j = 0; j < 3; j++)
+                byte lateShiftsSumStandard = 4;
+                for (byte i = 0; i < 14; i++)
                 {
-                    if (shifts[i, j, 1] == 1)
+                    if (scheduleState[i, j, 1] != 0)
                     {
-                        result -= 8;
+                        lateShiftsSumStandard--;
                     }
                 }
+
+                if (lateShiftsSumStandard > 0)
+                {
+                    result -= lateShiftsSumStandard * 8;
+                }
+                else
+                {
+                    result += lateShiftsSumStandard * 8;
+                }
+
             }
 
             // More than 3 consequently late shifts
-            for (byte j = 0; j < 11; j++)
+                for (byte j = 0; j < 11; j++)
             {
                 byte lateSum = 0;
 
