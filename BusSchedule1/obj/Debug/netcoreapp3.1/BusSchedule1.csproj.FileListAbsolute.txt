@@ -1,0 +1,13 @@
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\bin\Debug\netcoreapp3.1\BusSchedule1.exe
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\bin\Debug\netcoreapp3.1\BusSchedule1.deps.json
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\bin\Debug\netcoreapp3.1\BusSchedule1.runtimeconfig.json
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\bin\Debug\netcoreapp3.1\BusSchedule1.runtimeconfig.dev.json
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\bin\Debug\netcoreapp3.1\BusSchedule1.dll
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\bin\Debug\netcoreapp3.1\BusSchedule1.pdb
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.csprojAssemblyReference.cache
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.csproj.CoreCompileInputs.cache
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.AssemblyInfoInputs.cache
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.AssemblyInfo.cs
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.dll
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.pdb
+C:\Users\Asya Troyan\source\repos\BusSchedule1\BusSchedule1\obj\Debug\netcoreapp3.1\BusSchedule1.genruntimeconfig.cache
