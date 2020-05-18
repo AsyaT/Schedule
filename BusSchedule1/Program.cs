@@ -63,18 +63,16 @@ namespace BusSchedule1
             }
 
             // Shift preferences
-
-            for (byte i = 1; i <= 14; i++)
+            for (byte j = 1; j <= 11; j++)
             {
-                for (byte j = 1; j <= 11; j++)
+                Dictionary<byte, byte> currentDriver = DriverPreferbaleShift.GetValueOrDefault(j);
+                for (byte i = 1; i <= 14; i++)
                 {
+                    byte shiftNumber;
+                    currentDriver.TryGetValue(i, out shiftNumber);
+
                     for (byte k = 0; k < 2; k++)
                     {
-                        Dictionary<byte,byte> currentDriver = DriverPreferbaleShift.GetValueOrDefault(j);
-
-                        byte shiftNumber;
-                        currentDriver.TryGetValue(i, out shiftNumber);
-
                         if (shiftNumber == k && scheduleState[i-1, j-1, k] != 0)
                         {
                             result += 3;
@@ -85,20 +83,20 @@ namespace BusSchedule1
 
             // Day-off preference
 
-            for (byte i = 1; i <= 14; i++)
+            
+            for (byte j = 1; j <= 11; j++)
             {
-                for (byte j = 1; j <= 11; j++)
+                byte[] prefDaysOff = DriverPreferableDaysOff.GetValueOrDefault(j);
+                for (byte i = 1; i <= 14; i++)
                 {
-                    for (byte k = 0; k < 2; k++)
-                    {
-                        byte[] prefDaysOff = DriverPreferableDaysOff.GetValueOrDefault(j);
-                        bool isTodayPrefDayoff = prefDaysOff != null && prefDaysOff.Contains(i);
+                    
+                    bool isTodayPrefDayoff = prefDaysOff != null && prefDaysOff.Contains(i);
 
-                        if (isTodayPrefDayoff && scheduleState[i-1, j-1, k] == 0)
-                        {
-                            result += 4;
-                        }
+                    if (isTodayPrefDayoff && scheduleState[i-1, j-1, 0 ] == 0 && scheduleState[i - 1, j - 1, 0] == 0)
+                    {
+                        result += 4;
                     }
+                    
                 }
             }
 
