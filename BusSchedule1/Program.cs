@@ -20,8 +20,8 @@ namespace BusSchedule1
         static byte[,,] ScheduleState = new byte[14,11,2] ;
 
         /*
-         * 1 = not scheduled shift
-         * 0 =  scheduled shift
+         * 1 = not scheduled shift = shift exists here
+         * 0 =  scheduled shift = shift moved to schedule
          */
         static byte[,,] Shifts = new byte[14,3,2];
 
@@ -41,6 +41,10 @@ namespace BusSchedule1
             FillInData();
 
             Energy = CalculateEnergy(ScheduleState, Shifts);
+
+            TreeNode Root = new TreeNode();
+            Root.Add(new TreeNode(0, 0, 0, 0));
+            Root.Add(new TreeNode(0, 0, 0, 3));
         }
 
         static int CalculateEnergy(byte[,,] scheduleState, byte[,,] shifts)
