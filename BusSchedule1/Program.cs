@@ -14,13 +14,7 @@ namespace BusSchedule1
        * 2 = second line shift
        * 3 = third line shift
        */
-        private byte[,,] ScheduleState = new byte[14, 11, 2];
-
-        /*
-         * 1 = not scheduled shift = shift exists here
-         * 0 =  scheduled shift = shift moved to schedule
-         */
-        private byte[,,] Shifts = new byte[14, 3, 2];
+        static byte[,,] ScheduleState = new byte[14, 11, 2];
 
         static Dictionary<byte, byte[]> DriverAbilities = new Dictionary<byte, byte[]>();
         static Dictionary<byte, byte[]> DriverDaysOff = new Dictionary<byte, byte[]>();
@@ -34,13 +28,15 @@ namespace BusSchedule1
         {
             
             FillInData();
+            ScheduleState = InitSchedule();
 
-            SimulatedAnnealing();
+            byte[,,]  result = SimulatedAnnealing(ScheduleState, 967.0, 100.0);
 
         }
 
-        static void SimulatedAnnealing(byte[,,] state, double initialTemperature, double endTemperature)
+        static byte[,,] SimulatedAnnealing(byte[,,] incomeState, double initialTemperature, double endTemperature)
         {
+            byte[,,] state = incomeState;
             int currentEnergy = CalculateEnergy(state);
             int candidateEnergy;
             byte[,,]  stateCandidate;
@@ -73,10 +69,14 @@ namespace BusSchedule1
 
 
                 if (temperature <= endTemperature)
-                    break;
+                {
+                    return state;
+                }
                 
 
             }
+
+            return state;
         }
 
         private static bool IsTransition(double probability)

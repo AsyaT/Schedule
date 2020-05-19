@@ -17,8 +17,8 @@ namespace BusSchedule1
             Parent = null;
             Children = new List<TreeNode>();
 
-            ScheduleState = InitSchedule();
-            Shifts = InitShifts();
+            
+
         }
 
         public TreeNode(byte i, byte j, byte k, byte value)
