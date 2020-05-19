@@ -34,8 +34,6 @@ namespace BusSchedule1
             node.Parent = this;
         }
 
-        public int Energy => CalculateEnergy(ScheduleState, Shifts);
-
 
     }
 }

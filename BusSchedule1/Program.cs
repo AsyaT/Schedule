@@ -41,12 +41,17 @@ namespace BusSchedule1
             int candidateEnergy;
             byte[,,]  stateCandidate;
             double p;
+            /*
+             * 1 = not scheduled shift = shift exists here
+             * 0 =  scheduled shift = shift moved to schedule
+             */
+             byte[,,] availableShifts = InitShifts();
 
             double temperature = initialTemperature;
 
             for (int iteration = 0; iteration < 10000; iteration++)
             {
-                stateCandidate = GenerateStateCandidate(state);
+                stateCandidate = GenerateStateCandidate(state, ref availableShifts);
                 candidateEnergy = CalculateEnergy(stateCandidate);
 
                 if (candidateEnergy < currentEnergy)
@@ -79,10 +84,62 @@ namespace BusSchedule1
             return state;
         }
 
+        private static byte[,,] GenerateStateCandidate(byte[,,] state, ref byte[,,] availableShifts)
+        {   
+            Random random = new Random(1);
+            int day = random.Next(0, 13);
+            int driver = random.Next(0, 10);
+            int time = random.Next(0, 1);
+            int lineNum = random.Next(0, 2);
+
+            while (availableShifts[day, lineNum, time] == 0) // while not find not scheduled shift
+            {
+                day = random.Next(0, 13);
+                lineNum = random.Next(0, 2);
+                time = random.Next(0, 1);
+            }
+
+            while (
+                IsTodayDayOff((byte) (driver + 1), (byte) (day + 1)) == true 
+                || 
+                IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)) == false)
+            {
+                driver = random.Next(0, 10);
+            }
+
+            state[day, driver, time] = (byte)lineNum;
+            availableShifts[day, lineNum, time] = 0;
+
+            return state;
+        }
+
+        static bool IsTodayDayOff(byte driver, byte day)
+        {
+            byte[] daysOff;
+            DriverDaysOff.TryGetValue(driver, out daysOff);
+
+            if (daysOff!=null && daysOff.Contains(day))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        static bool IsDriverCanDriveLine(byte driver, byte line)
+        {
+            byte[] lines = null;
+            DriverAbilities.TryGetValue(driver, out lines);
+            return lines !=null && lines.Contains(line);
+
+        }
+
         private static bool IsTransition(double probability)
         {
             Random randomizer = new Random(1);
-            double value = randomizer.Next(1000) * 0.001;
+            double value = randomizer.Next(0,1000) * 0.001;
 
             if (value < probability)
             {
@@ -96,7 +153,7 @@ namespace BusSchedule1
 
         private static double DecreaseTemperature(double temperature, int iteration)
         {
-            return temperature * 0.1 / iteration;
+            return temperature * 0.1 / (iteration+1);
         }
 
         private static double GetTransitionProbability(int diffEnergy, double temperature)
