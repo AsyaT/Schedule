@@ -7,8 +7,21 @@ namespace BusSchedule1
 {
     class Program
     {
+        /*
+       *  Schedule rules
+       * 0 = no shift
+       * 1 = first line shift
+       * 2 = second line shift
+       * 3 = third line shift
+       */
+        private byte[,,] ScheduleState = new byte[14, 11, 2];
 
-       
+        /*
+         * 1 = not scheduled shift = shift exists here
+         * 0 =  scheduled shift = shift moved to schedule
+         */
+        private byte[,,] Shifts = new byte[14, 3, 2];
+
         static Dictionary<byte, byte[]> DriverAbilities = new Dictionary<byte, byte[]>();
         static Dictionary<byte, byte[]> DriverDaysOff = new Dictionary<byte, byte[]>();
         static Dictionary<byte, byte[]> DriverPreferableDaysOff = new Dictionary<byte, byte[]>();
@@ -22,44 +35,292 @@ namespace BusSchedule1
             
             FillInData();
 
-            //Energy = CalculateEnergy(ScheduleState, Shifts);
+            SimulatedAnnealing();
 
-            TreeNode Root = new TreeNode();
+        }
 
-            TreeNode tmpNode = Root;
+        static void SimulatedAnnealing(byte[,,] state, double initialTemperature, double endTemperature)
+        {
+            int currentEnergy = CalculateEnergy(state);
+            int candidateEnergy;
+            byte[,,]  stateCandidate;
+            double p;
 
+            double temperature = initialTemperature;
+
+            for (int iteration = 0; iteration < 10000; iteration++)
+            {
+                stateCandidate = GenerateStateCandidate(state);
+                candidateEnergy = CalculateEnergy(stateCandidate);
+
+                if (candidateEnergy < currentEnergy)
+                {
+                    currentEnergy = candidateEnergy;
+                    state = stateCandidate;
+                }
+                else
+                {
+                    p = GetTransitionProbability(candidateEnergy - currentEnergy, temperature); 
+                    if (IsTransition(p)) 
+                    { 
+                        currentEnergy = candidateEnergy;
+                        state = stateCandidate;
+                   
+                    }
+                }
+
+                temperature = DecreaseTemperature(initialTemperature, iteration); // ??? (temperature, iteration)
+
+
+                if (temperature <= endTemperature)
+                    break;
+                
+
+            }
+        }
+
+        private static bool IsTransition(double probability)
+        {
+            Random randomizer = new Random(1);
+            double value = randomizer.Next(1000) * 0.001;
+
+            if (value < probability)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static double DecreaseTemperature(double temperature, int iteration)
+        {
+            return temperature * 0.1 / iteration;
+        }
+
+        private static double GetTransitionProbability(int diffEnergy, double temperature)
+        {
+            return Math.Exp((-1) *(diffEnergy / temperature));
+        }
+
+
+        static int CalculateEnergy(byte[,,] scheduleState)
+        {
+            int result = 0;
+
+            // Not scheduled shift
+            for (byte i = 0; i < 14; i++)
+            {
+                for (byte k = 0; k < 2; k++)
+                {
+                    bool firsLineScheduled = false, secondLineScheduled = false, thirsLineScheduled = false;
+                    for (byte j = 0; j < 11; j++)
+                    {
+                        if (scheduleState[i, j, k] == 1)
+                        {
+                            firsLineScheduled = true;
+                        }
+
+                        if (scheduleState[i, j, k] == 2)
+                        {
+                            secondLineScheduled = true;
+                        }
+
+                        if (scheduleState[i, j, k] == 3)
+                        {
+                            thirsLineScheduled = true;
+                        }
+                    }
+
+                    if (firsLineScheduled == false)
+                    {
+                        result -= 20;
+                    }
+                    if (secondLineScheduled == false)
+                    {
+                        result -= 20;
+                    }
+                    if (thirsLineScheduled == false)
+                    {
+                        result -= 20;
+                    }
+                }
+            }
+
+            // Shift preferences
+            for (byte j = 1; j <= 11; j++)
+            {
+                Dictionary<byte, byte> currentDriver = DriverPreferbaleShift.GetValueOrDefault(j);
+                for (byte i = 1; i <= 14; i++)
+                {
+                    byte shiftNumber;
+                    currentDriver.TryGetValue(i, out shiftNumber);
+
+                    for (byte k = 0; k < 2; k++)
+                    {
+                        if (shiftNumber == k && scheduleState[i - 1, j - 1, k] != 0)
+                        {
+                            result += 3;
+                        }
+                    }
+                }
+            }
+
+            // Day-off preference
+
+
+            for (byte j = 1; j <= 11; j++)
+            {
+                byte[] prefDaysOff = DriverPreferableDaysOff.GetValueOrDefault(j);
+                for (byte i = 1; i <= 14; i++)
+                {
+
+                    bool isTodayPrefDayoff = prefDaysOff != null && prefDaysOff.Contains(i);
+
+                    if (isTodayPrefDayoff && scheduleState[i - 1, j - 1, 0] == 0 && scheduleState[i - 1, j - 1, 0] == 0)
+                    {
+                        result += 4;
+                    }
+
+                }
+            }
+
+            // Long rests
+            for (byte j = 0; j < 11; j++)
+            {
+                List<int> gapsLength = new List<int>();
+                int currentGapLength = 0;
+                for (byte i = 0; i < 14; i++)
+                {
+                    for (byte k = 0; k < 2; k++)
+                    {
+                        if (scheduleState[i, j, k] == 0)
+                        {
+                            currentGapLength++;
+                        }
+                        else if (currentGapLength > 0)
+                        {
+                            gapsLength.Add(currentGapLength);
+                            currentGapLength = 0;
+                        };
+                    }
+                }
+
+                if (currentGapLength > 0)
+                {
+                    gapsLength.Add(currentGapLength);
+                };
+
+                foreach (var gapLength in gapsLength)
+                {
+                    if (gapLength >= 3)
+                    {
+                        result += 5;
+                    }
+                }
+
+            }
+
+            // Early shift after late shift
+
+            for (byte j = 0; j < 11; j++)
+            {
+                for (byte i = 0; i < 14; i++)
+                {
+                    if (scheduleState[i, j, 1] != 0 && scheduleState[i + 1, j, 0] != 0)
+                    {
+                        result -= 30;
+                    }
+
+                }
+            }
+
+            // Not scheduled night shift
+            //TODO: For every late shift assigned that is not equal to 4
+
+            for (byte j = 0; j < 11; j++)
+            {
+                byte lateShiftsSumStandard = 4;
+                for (byte i = 0; i < 14; i++)
+                {
+                    if (scheduleState[i, j, 1] != 0)
+                    {
+                        lateShiftsSumStandard--;
+                    }
+                }
+
+                if (lateShiftsSumStandard > 0)
+                {
+                    result -= lateShiftsSumStandard * 8;
+                }
+                else
+                {
+                    result += lateShiftsSumStandard * 8;
+                }
+
+            }
+
+            // More than 3 consequently late shifts
+            for (byte j = 0; j < 11; j++)
+            {
+                byte lateSum = 0;
+
+                for (byte i = 0; i < 14; i++)
+                {
+
+                    while (scheduleState[i, j, 1] != 0)
+                    {
+                        lateSum++;
+                        i++;
+                    }
+
+                    if (lateSum > 3)
+                    {
+                        result -= (lateSum - 3) * 10;
+                        lateSum = 0;
+                    }
+                }
+
+
+            }
+
+
+            return result;
+        }
+
+        private static byte[,,] InitSchedule()
+        {
+            byte[,,] schedule = new byte[14, 11, 2];
             for (byte i = 0; i < 14; i++)
             {
                 for (byte j = 0; j < 11; j++)
                 {
                     for (byte k = 0; k < 2; k++)
                     {
-                        
-                        
+                        schedule[i, j, k] = 0;
                     }
                 }
             }
+
+            return schedule;
         }
 
-        void Traverse(TreeNode currentNode, byte i, byte j, byte k)
+        private static byte[,,] InitShifts()
         {
-            List<byte> possibleValues = CalculateAvaliableValues(currentNode, i, j, k /*create param*/);
-            foreach (var value in possibleValues)
+            byte[,,] result = new byte[14, 3, 2];
+            for (byte i = 0; i < 14; i++)
             {
-                var newNode = new TreeNode(i, j, k, value);
-                currentNode.Add(newNode);
-
-                byte newI, newJ, newK;
-
-
-
-                Traverse(newNode, newI, newJ, newK);
+                for (byte j = 0; j < 3; j++)
+                {
+                    for (byte k = 0; k < 2; k++)
+                    {
+                        result[i, j, k] = 1;
+                    }
+                }
             }
-        }
 
-        private static List<byte> CalculateAvaliableValues()
-        {
-
+            return result;
         }
 
         static void FillInData()
