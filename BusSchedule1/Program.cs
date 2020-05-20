@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 
@@ -54,7 +55,7 @@ namespace BusSchedule1
                 stateCandidate = GenerateStateCandidate(state, ref availableShifts);
                 candidateEnergy = CalculateEnergy(stateCandidate);
 
-                if (candidateEnergy < currentEnergy)
+                if (candidateEnergy > currentEnergy)
                 {
                     currentEnergy = candidateEnergy;
                     state = stateCandidate;
@@ -73,7 +74,7 @@ namespace BusSchedule1
                 temperature = DecreaseTemperature(initialTemperature, iteration); // ??? (temperature, iteration)
 
 
-                if (temperature <= endTemperature)
+                if (temperature <= endTemperature || HasNotScheduledShifts(availableShifts) == false)
                 {
                     return state;
                 }
@@ -102,15 +103,37 @@ namespace BusSchedule1
             while (
                 IsTodayDayOff((byte) (driver + 1), (byte) (day + 1)) == true 
                 || 
-                IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)) == false)
+                IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)) == false
+                ||
+                state[day,driver,(time+1)%2] != 0
+                )
             {
                 driver = random.Next(0, 10);
             }
 
-            state[day, driver, time] = (byte)lineNum;
+            state[day, driver, time] = (byte)(lineNum+1);
             availableShifts[day, lineNum, time] = 0;
 
             return state;
+        }
+
+        static bool HasNotScheduledShifts(byte[,,] shifts)
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (shifts[i, j, j] == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         static bool IsTodayDayOff(byte driver, byte day)
@@ -153,7 +176,7 @@ namespace BusSchedule1
 
         private static double DecreaseTemperature(double temperature, int iteration)
         {
-            return temperature * 0.1 / (iteration+1);
+            return temperature - iteration * 0.5;
         }
 
         private static double GetTransitionProbability(int diffEnergy, double temperature)
