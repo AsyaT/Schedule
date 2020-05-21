@@ -84,7 +84,7 @@ namespace BusSchedule1
 
             int dayMax = 14;
             int driverMax = 11;
-            int lineMax = 2; //TODO: maybe 3
+            int lineMax = 3; //TODO: maybe 3
             int timeMax = 2;
 
             int day = random.Next(0, dayMax);
@@ -110,7 +110,7 @@ namespace BusSchedule1
                 driver = random.Next(0, driverMax);
             }
 
-            state.SetLineToDriver((byte)(lineNum + 1), driver, day,time);
+            state.SetLineToDriver(lineNum,  driver, day,time);
 
             return state;
         }

@@ -38,9 +38,9 @@ namespace BusSchedule1
         }
 
 
-        public void SetLineToDriver(byte lineNum, int driver, int day, int time)
+        public void SetLineToDriver(int lineNum, int driver, int day, int time)
         {
-            Schedule[day, driver, time] = lineNum;
+            Schedule[day, driver, time] = (byte)(lineNum+1);
             AvailableShifts[day, lineNum, time] = 0;
         }
 
@@ -224,7 +224,7 @@ namespace BusSchedule1
             {
                 for (byte i = 0; i < 14; i++)
                 {
-                    if (Schedule[i, j, 1] != 0 && Schedule[i + 1, j, 0] != 0)
+                    if (i<13 && Schedule[i, j, 1] != 0 && Schedule[i + 1, j, 0] != 0)
                     {
                         result -= 30;
                     }
@@ -268,7 +268,10 @@ namespace BusSchedule1
                     while (Schedule[i, j, 1] != 0)
                     {
                         lateSum++;
-                        i++;
+                        if (i < 13)
+                        {
+                            i++;
+                        }
                     }
 
                     if (lateSum > 3)
