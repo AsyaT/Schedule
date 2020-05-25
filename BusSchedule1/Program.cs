@@ -25,6 +25,9 @@ namespace BusSchedule1
 
             ScheduleState result = SimulatedAnnealing(ScheduleState, 10000.0, 1.0);
 
+            PrintSchedule(result);
+            PrintLeftShifts(result.AvailableShifts);
+
         }
 
         static ScheduleState SimulatedAnnealing(ScheduleState incomeState, double initialTemperature, double endTemperature)
@@ -125,10 +128,6 @@ namespace BusSchedule1
             return state;
         }
 
-       
-
-        
-
         private static bool IsTransition(double probability)
         {
             Random randomizer = new Random(1);
@@ -154,5 +153,59 @@ namespace BusSchedule1
             return Math.Exp((-1) *(diffEnergy / temperature));
         }
 
+        static void PrintSchedule(ScheduleState state)
+        {
+            Console.WriteLine("Schedule");
+            for (int j = 0; j < 11; j++)
+            {
+                Console.Write("Driver " + (int)(j+1) + ": ");
+                if(j+1<10) Console.Write(" ");
+                for (int i = 0; i < 14; i++)
+                {
+                    
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (state.IsTodayDayOff((byte)(j + 1), (byte)(i + 1)))
+                        {
+                            Console.Write("x ");
+                        }
+                        else
+                        {
+                            if (state.IsPrefToWork((byte)(j+1),(byte)(i+1), (byte)k))
+                            {
+                                Console.BackgroundColor = ConsoleColor.Yellow;
+                                Console.ForegroundColor = ConsoleColor.Black;
+                            }
+                            Console.Write(state.Schedule[i, j, k] + " ");
+
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            Console.ForegroundColor = ConsoleColor.Gray;
+                        }
+                    }
+                    Console.Write(" ");
+                }
+                Console.WriteLine();
+            }
+
+        }
+
+        static void PrintLeftShifts(byte[,,] result)
+        {
+            Console.WriteLine("Left shifts");
+
+            
+            for (int j = 0; j < 3; j++)
+            {
+                for (int i = 0; i < 14; i++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        Console.Write(result[i,j,k]+" ");
+                    }
+                    Console.Write(" ");
+                }
+                Console.WriteLine();
+            }
+        }
     }
 }
