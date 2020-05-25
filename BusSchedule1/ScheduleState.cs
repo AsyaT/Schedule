@@ -34,15 +34,19 @@ namespace BusSchedule1
             return AvailableShifts[day, lineNum, time] == 0;
         }
 
-        public bool IsDriverBusyToday(int day, int driver, int time)
+        public bool IsDriverBusyToday(int day, int driver)
         {
-            return Schedule[day, driver, (time + 1) % 2] != 0;
+            return Schedule[day, driver, 0] != 0 || Schedule[day, driver, 1] != 0;
         }
 
 
         public void SetLineToDriver(int lineNum, int driver, int day, int time)
         {
             Schedule[day, driver, time] = (byte) (lineNum + 1);
+
+            Console.Write("Tile: "+day+" "+driver+" "+time+" set to:"+ Schedule[day, driver, time]);
+            Console.WriteLine("  Is can drive: "+IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)));
+
             AvailableShifts[day, lineNum, time] = 0;
         }
 
@@ -396,6 +400,84 @@ namespace BusSchedule1
             {
                 return false;
             }
+        }
+
+        public bool IsLeftOneShift()
+        {
+            int sum = 0;
+            for (int i = 0; i < 14; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        sum += AvailableShifts[i, j, k];
+                    }
+                }
+                
+            }
+
+            return sum == 1;
+        }
+
+        public int? GetLastDay()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (AvailableShifts[i, j, k] == 1)
+                        {
+                            return i;
+                        };
+                    }
+                }
+
+            }
+
+            return null;
+        }
+
+        public int? GetLastTime()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (AvailableShifts[i, j, k] == 1)
+                        {
+                            return k;
+                        };
+                    }
+                }
+
+            }
+
+            return null;
+        }
+
+        public int? GetLastLine()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (AvailableShifts[i, j, k] == j)
+                        {
+                            return i;
+                        };
+                    }
+                }
+
+            }
+
+            return null;
         }
     }
 }

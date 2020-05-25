@@ -86,46 +86,88 @@ namespace BusSchedule1
             Random random = new Random((int)DateTime.Now.Ticks);
 
             int dayMax = 14;
-            int driverMax = 11;
-            int lineMax = 3; //TODO: maybe 3
+            int lineMax = 3; 
             int timeMax = 2;
 
             int day = random.Next(0, dayMax);
-            int driver = random.Next(0, driverMax);
             int time = random.Next(0, timeMax);
             int lineNum = random.Next(0, lineMax);
 
-            while (state.IsShiftScheduled(day, lineNum, time)) // while not find not scheduled shift
+            while (state.IsShiftScheduled(day, lineNum, time))
             {
                 day = random.Next(0, dayMax);
                 lineNum = random.Next(0, lineMax);
                 time = random.Next(0, timeMax);
             }
 
-            bool driverHasDayOff = state.IsTodayDayOff((byte) (driver + 1), (byte) (day + 1));
-            bool isDriverCanDriveTheLine =
-                state.IsDriverCanDriveLine((byte) (driver + 1), (byte) (lineNum + 1)) == false;
-            bool isDriverBusyToday = state.IsDriverBusyToday(day, driver, time);
+            int? driver = SearchForDriver(state, day, lineNum);
 
-            while (
-                driverHasDayOff == true 
-                || 
-                isDriverCanDriveTheLine == false
-                ||
-                isDriverBusyToday == true
-                )
+            while (driver == null)
             {
-                driver = random.Next(0, driverMax);
+                day = random.Next(0, dayMax);
+                lineNum = random.Next(0, lineMax);
+                time = random.Next(0, timeMax);
 
-                driverHasDayOff = state.IsTodayDayOff((byte)(driver + 1), (byte)(day + 1));
-                isDriverCanDriveTheLine =
-                    state.IsDriverCanDriveLine((byte)(driver + 1), (byte)(lineNum + 1)) ;
-                isDriverBusyToday = state.IsDriverBusyToday(day, driver, time);
+                while (state.IsShiftScheduled(day, lineNum, time))
+                {
+                    day = random.Next(0, dayMax);
+                    lineNum = random.Next(0, lineMax);
+                    time = random.Next(0, timeMax);
+
+                    if (state.IsLeftOneShift())
+                    {
+                        day = state.GetLastDay().Value;
+                        time = state.GetLastTime().Value;
+                        lineNum = state.GetLastLine().Value;
+                    }
+                }
+
+                driver = SearchForDriver(state, day, lineNum);
             }
 
-            state.SetLineToDriver(lineNum,  driver, day,time);
+            state.SetLineToDriver(lineNum,  driver.Value, day, time);
 
             return state;
+        }
+
+        private static int? SearchForDriver(ScheduleState state, int day, int lineNum)
+        {
+            Random random = new Random((int)DateTime.Now.Ticks);
+            int driverMax = 11;
+
+            int driver = random.Next(0, driverMax);
+
+            int iterationToFind = 0;
+
+            while ((
+                       state.IsTodayDayOff((byte)(driver + 1), (byte)(day + 1)) == true
+                       ||
+                       state.IsDriverCanDriveLine((byte)(driver + 1), (byte)(lineNum + 1)) == false
+                       ||
+                       state.IsDriverBusyToday(day, driver) == true
+                   )
+                   &&
+                   iterationToFind < 1000
+            )
+            {
+                driver = random.Next(0, driverMax);
+                iterationToFind++;
+            }
+
+            if (
+                state.IsTodayDayOff((byte)(driver + 1), (byte)(day + 1)) == false
+                &&
+                state.IsDriverCanDriveLine((byte)(driver + 1), (byte)(lineNum + 1)) == true
+                &&
+                state.IsDriverBusyToday(day, driver) == false
+                )
+            {
+                return driver;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private static bool IsTransition(double probability)
@@ -176,6 +218,12 @@ namespace BusSchedule1
                                 Console.BackgroundColor = ConsoleColor.Yellow;
                                 Console.ForegroundColor = ConsoleColor.Black;
                             }
+
+                            if (state.Schedule[i, j, k] != 0)
+                            {
+                                Console.ForegroundColor = ConsoleColor.White;
+                            }
+
                             Console.Write(state.Schedule[i, j, k] + " ");
 
                             Console.BackgroundColor = ConsoleColor.Black;
