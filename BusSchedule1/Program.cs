@@ -23,9 +23,15 @@ namespace BusSchedule1
         static void Main(string[] args)
         {
             ScheduleState = new ScheduleState();
-
             ScheduleState result = SimulatedAnnealing(ScheduleState, 10000.0, 1.0);
+            /*
+            int topEnergy = -500;
 
+            while (result.CurrentEnergy > topEnergy)
+            {
+                result = SimulatedAnnealing(ScheduleState, 10000.0, 1.0);
+            }
+            */
             PrintSchedule(result);
             PrintLeftShifts(result.AvailableShifts);
 
@@ -74,7 +80,7 @@ namespace BusSchedule1
                     }
                     else
                     {
-                        Console.WriteLine("Bad p: "+p);
+                        //Console.WriteLine("Bad p: "+p);
                     }
                 }
 
@@ -143,7 +149,7 @@ namespace BusSchedule1
                 shift.Line = random.Next(0, lineMax);
                 shift.Time = random.Next(0, timeMax);
 
-                if (state.IsLeftLassSixShift())
+                if (state.IsLeftLassFiveShift())
                 {
                     shift = state.GetFirstAvaliable();
                 }

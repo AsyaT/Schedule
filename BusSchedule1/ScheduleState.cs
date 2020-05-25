@@ -12,6 +12,8 @@ namespace BusSchedule1
 
         internal byte[,,] AvailableShifts ;
 
+        public int CurrentEnergy { get; private set; }
+
         Dictionary<byte, byte[]> DriverAbilities = new Dictionary<byte, byte[]>();
         Dictionary<byte, byte[]> DriverDaysOff = new Dictionary<byte, byte[]>();
 
@@ -310,6 +312,7 @@ namespace BusSchedule1
             }
 
             //Console.WriteLine("More than 3 consequently late shifts: " + result);
+            CurrentEnergy = result;
 
             return result;
         }
@@ -402,7 +405,7 @@ namespace BusSchedule1
             }
         }
 
-        public bool IsLeftLassSixShift()
+        public bool IsLeftLassFiveShift()
         {
             int sum = 0;
             for (int i = 0; i < 14; i++)
@@ -417,7 +420,7 @@ namespace BusSchedule1
                 
             }
 
-            return sum <= 6;
+            return sum <= 5;
         }
 
         public ShiftStructure GetFirstAvaliable()
