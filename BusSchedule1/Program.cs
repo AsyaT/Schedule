@@ -82,45 +82,22 @@ namespace BusSchedule1
         }
 
         private static ScheduleState GenerateStateCandidate(ScheduleState state)
-        {   
-            Random random = new Random((int)DateTime.Now.Ticks);
+        {
+            ShiftStructure shift = SearchForShift(state);
 
-            int dayMax = 14;
-            int lineMax = 3; 
-            int timeMax = 2;
-
-            int day = random.Next(0, dayMax);
-            int time = random.Next(0, timeMax);
-            int lineNum = random.Next(0, lineMax);
-
-            while (state.IsShiftScheduled(day, lineNum, time))
-            {
-                day = random.Next(0, dayMax);
-                lineNum = random.Next(0, lineMax);
-                time = random.Next(0, timeMax);
-            }
+            int day = shift.Day;
+            int time = shift.Time;
+            int lineNum = shift.Line;
 
             int? driver = SearchForDriver(state, day, lineNum);
 
             while (driver == null)
             {
-                day = random.Next(0, dayMax);
-                lineNum = random.Next(0, lineMax);
-                time = random.Next(0, timeMax);
+                shift = SearchForShift(state);
 
-                while (state.IsShiftScheduled(day, lineNum, time))
-                {
-                    day = random.Next(0, dayMax);
-                    lineNum = random.Next(0, lineMax);
-                    time = random.Next(0, timeMax);
-
-                    if (state.IsLeftOneShift())
-                    {
-                        day = state.GetLastDay().Value;
-                        time = state.GetLastTime().Value;
-                        lineNum = state.GetLastLine().Value;
-                    }
-                }
+                day = shift.Day;
+                time = shift.Time;
+                lineNum = shift.Line;
 
                 driver = SearchForDriver(state, day, lineNum);
             }
@@ -128,6 +105,37 @@ namespace BusSchedule1
             state.SetLineToDriver(lineNum,  driver.Value, day, time);
 
             return state;
+        }
+
+        private static ShiftStructure SearchForShift(ScheduleState state)
+        {
+            Random random = new Random((int)DateTime.Now.Ticks);
+
+            int dayMax = 14;
+            int lineMax = 3;
+            int timeMax = 2;
+
+            ShiftStructure shift = new ShiftStructure();
+
+            shift.Day = random.Next(0, dayMax);
+            shift.Line = random.Next(0, lineMax);
+            shift.Time = random.Next(0, timeMax);
+
+            while (state.IsShiftAlreadyScheduled(shift.Day, shift.Line, shift.Time))
+            {
+                shift.Day = random.Next(0, dayMax);
+                shift.Line = random.Next(0, lineMax);
+                shift.Time = random.Next(0, timeMax);
+
+                if (state.IsLeftOneShift())
+                {
+                    shift.Day = state.GetLastDay().Value;
+                    shift.Time = state.GetLastTime().Value;
+                    shift.Line = state.GetLastLine().Value;
+                }
+            }
+
+            return shift;
         }
 
         private static int? SearchForDriver(ScheduleState state, int day, int lineNum)

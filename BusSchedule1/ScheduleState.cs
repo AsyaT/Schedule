@@ -29,7 +29,7 @@ namespace BusSchedule1
             FillInData();
         }
 
-        public bool IsShiftScheduled(int day, int lineNum, int time)
+        public bool IsShiftAlreadyScheduled(int day, int lineNum, int time)
         {
             return AvailableShifts[day, lineNum, time] == 0;
         }
