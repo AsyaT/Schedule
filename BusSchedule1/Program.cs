@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace BusSchedule1
@@ -48,6 +49,12 @@ namespace BusSchedule1
             for (int iteration = 0; iteration < 10000; iteration++)
             {
                 stateCandidate = GenerateStateCandidate(state);
+
+                if (stateCandidate == null)
+                {
+                    return state;
+                }
+
                 candidateEnergy = stateCandidate.CalculateEnergy();
                 
 
@@ -100,6 +107,11 @@ namespace BusSchedule1
                 lineNum = shift.Line;
 
                 driver = SearchForDriver(state, day, lineNum);
+
+                if (driver == null && shift.IsLast == true)
+                {
+                    return null;
+                }
             }
 
             state.SetLineToDriver(lineNum,  driver.Value, day, time);
@@ -115,7 +127,7 @@ namespace BusSchedule1
             int lineMax = 3;
             int timeMax = 2;
 
-            ShiftStructure shift = new ShiftStructure();
+            ShiftStructure shift = new ShiftStructure(){IsLast = false};
 
             shift.Day = random.Next(0, dayMax);
             shift.Line = random.Next(0, lineMax);
@@ -127,11 +139,9 @@ namespace BusSchedule1
                 shift.Line = random.Next(0, lineMax);
                 shift.Time = random.Next(0, timeMax);
 
-                if (state.IsLeftOneShift())
+                if (state.IsLeftLassSixShift())
                 {
-                    shift.Day = state.GetLastDay().Value;
-                    shift.Time = state.GetLastTime().Value;
-                    shift.Line = state.GetLastLine().Value;
+                    shift = state.GetFirstAvaliable();
                 }
             }
 

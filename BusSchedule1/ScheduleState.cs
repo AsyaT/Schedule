@@ -402,7 +402,7 @@ namespace BusSchedule1
             }
         }
 
-        public bool IsLeftOneShift()
+        public bool IsLeftLassSixShift()
         {
             int sum = 0;
             for (int i = 0; i < 14; i++)
@@ -417,10 +417,10 @@ namespace BusSchedule1
                 
             }
 
-            return sum == 1;
+            return sum <= 6;
         }
 
-        public int? GetLastDay()
+        public ShiftStructure GetFirstAvaliable()
         {
             for (int i = 0; i < 14; i++)
             {
@@ -430,54 +430,15 @@ namespace BusSchedule1
                     {
                         if (AvailableShifts[i, j, k] == 1)
                         {
-                            return i;
+                            return new ShiftStructure(){Day = i, Line = j, Time = k, IsLast = true};
                         };
                     }
                 }
-
             }
 
             return null;
         }
 
-        public int? GetLastTime()
-        {
-            for (int i = 0; i < 14; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (AvailableShifts[i, j, k] == 1)
-                        {
-                            return k;
-                        };
-                    }
-                }
 
-            }
-
-            return null;
-        }
-
-        public int? GetLastLine()
-        {
-            for (int i = 0; i < 14; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (AvailableShifts[i, j, k] == j)
-                        {
-                            return i;
-                        };
-                    }
-                }
-
-            }
-
-            return null;
-        }
     }
 }
