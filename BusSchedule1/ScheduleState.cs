@@ -44,8 +44,8 @@ namespace BusSchedule1
         {
             Schedule[day, driver, time] = (byte) (lineNum + 1);
 
-            Console.Write("Tile: "+day+" "+driver+" "+time+" set to:"+ Schedule[day, driver, time]);
-            Console.WriteLine("  Is can drive: "+IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)));
+            //Console.Write("Tile: "+day+" "+driver+" "+time+" set to:"+ Schedule[day, driver, time]);
+            //Console.WriteLine("  Is can drive: "+IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)));
 
             AvailableShifts[day, lineNum, time] = 0;
         }

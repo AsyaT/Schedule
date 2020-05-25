@@ -72,11 +72,15 @@ namespace BusSchedule1
                         state = stateCandidate;
                    
                     }
+                    else
+                    {
+                        Console.WriteLine("Bad p: "+p);
+                    }
                 }
 
                 Console.WriteLine("Candidate energy: " + currentEnergy);
 
-                temperature = DecreaseTemperature(initialTemperature, iteration); // ??? (temperature, iteration)
+                temperature = DecreaseTemperature(initialTemperature, iteration); 
 
 
                 if (temperature <= endTemperature || (state.HasNotScheduledShifts == false))
@@ -227,7 +231,11 @@ namespace BusSchedule1
                     {
                         if (state.IsTodayDayOff((byte)(j + 1), (byte)(i + 1)))
                         {
+                            Console.BackgroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = ConsoleColor.Black;
                             Console.Write("x ");
+                            Console.BackgroundColor = ConsoleColor.Black;
+                            Console.ForegroundColor = ConsoleColor.Gray;
                         }
                         else
                         {
@@ -256,6 +264,7 @@ namespace BusSchedule1
 
         static void PrintLeftShifts(byte[,,] result)
         {
+            Console.WriteLine("");
             Console.WriteLine("Left shifts");
 
             
