@@ -55,7 +55,7 @@ namespace BusSchedule1
                 }
                 else
                 {
-                    p = GetTransitionProbability(candidateEnergy - currentEnergy, temperature); 
+                    p = GetTransitionProbability(currentEnergy- candidateEnergy, temperature); 
                     if (IsTransition(p)) 
                     { 
                         currentEnergy = candidateEnergy;
@@ -69,7 +69,7 @@ namespace BusSchedule1
                 temperature = DecreaseTemperature(initialTemperature, iteration); // ??? (temperature, iteration)
 
 
-                if (temperature <= endTemperature )
+                if (temperature <= endTemperature || (state.HasNotScheduledShifts == false))
                 {
                     return state;
                 }
@@ -99,15 +99,25 @@ namespace BusSchedule1
                 time = random.Next(0, timeMax);
             }
 
+            bool driverHasDayOff = state.IsTodayDayOff((byte) (driver + 1), (byte) (day + 1));
+            bool isDriverCanDriveTheLine =
+                state.IsDriverCanDriveLine((byte) (driver + 1), (byte) (lineNum + 1)) == false;
+            bool isDriverBusyToday = state.IsDriverBusyToday(day, driver, time);
+
             while (
-                state.IsTodayDayOff((byte) (driver + 1), (byte) (day + 1)) == true 
+                driverHasDayOff == true 
                 || 
-                state.IsDriverCanDriveLine((byte)(driver+1), (byte)(lineNum+1)) == false
+                isDriverCanDriveTheLine == false
                 ||
-                state.IsDriverBusyToday(day,driver,time)
+                isDriverBusyToday == true
                 )
             {
                 driver = random.Next(0, driverMax);
+
+                driverHasDayOff = state.IsTodayDayOff((byte)(driver + 1), (byte)(day + 1));
+                isDriverCanDriveTheLine =
+                    state.IsDriverCanDriveLine((byte)(driver + 1), (byte)(lineNum + 1)) ;
+                isDriverBusyToday = state.IsDriverBusyToday(day, driver, time);
             }
 
             state.SetLineToDriver(lineNum,  driver, day,time);
@@ -115,24 +125,7 @@ namespace BusSchedule1
             return state;
         }
 
-        static bool HasNotScheduledShifts(byte[,,] shifts)
-        {
-            for (int i = 0; i < 14; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    for (int k = 0; k < 2; k++)
-                    {
-                        if (shifts[i, j, j] == 1)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
+       
 
         
 
@@ -151,9 +144,9 @@ namespace BusSchedule1
             }
         }
 
-        private static double DecreaseTemperature(double temperature, int iteration)
+        private static double DecreaseTemperature(double initialTemperature, int iteration)
         {
-            return temperature - iteration * 0.5;
+            return initialTemperature * 0.1 / (iteration + 1);
         }
 
         private static double GetTransitionProbability(int diffEnergy, double temperature)

@@ -12,13 +12,15 @@ namespace BusSchedule1
 
         private byte[,,] AvailableShifts;
 
-         Dictionary<byte, byte[]> DriverAbilities = new Dictionary<byte, byte[]>();
-         Dictionary<byte, byte[]> DriverDaysOff = new Dictionary<byte, byte[]>();
-         Dictionary<byte, byte[]> DriverPreferableDaysOff = new Dictionary<byte, byte[]>();
+        Dictionary<byte, byte[]> DriverAbilities = new Dictionary<byte, byte[]>();
+        Dictionary<byte, byte[]> DriverDaysOff = new Dictionary<byte, byte[]>();
+
+        Dictionary<byte, byte[]> DriverPreferableDaysOff = new Dictionary<byte, byte[]>();
+
         /*
          * Dic [day, {early = 0 late = 1} ]
          */
-         Dictionary<byte, Dictionary<byte, byte>> DriverPreferbaleShift = new Dictionary<byte, Dictionary<byte, byte>>();
+        Dictionary<byte, Dictionary<byte, byte>> DriverPreferbaleShift = new Dictionary<byte, Dictionary<byte, byte>>();
 
         public ScheduleState()
         {
@@ -40,7 +42,7 @@ namespace BusSchedule1
 
         public void SetLineToDriver(int lineNum, int driver, int day, int time)
         {
-            Schedule[day, driver, time] = (byte)(lineNum+1);
+            Schedule[day, driver, time] = (byte) (lineNum + 1);
             AvailableShifts[day, lineNum, time] = 0;
         }
 
@@ -133,16 +135,20 @@ namespace BusSchedule1
                     {
                         result -= 20;
                     }
+
                     if (secondLineScheduled == false)
                     {
                         result -= 20;
                     }
+
                     if (thirsLineScheduled == false)
                     {
                         result -= 20;
                     }
                 }
             }
+
+            Console.WriteLine("No scheduled shifts: " + result);
 
             // Shift preferences
             for (byte j = 1; j <= 11; j++)
@@ -163,6 +169,8 @@ namespace BusSchedule1
                 }
             }
 
+            Console.WriteLine("Shift preferences" + result);
+
             // Day-off preference
 
 
@@ -182,6 +190,8 @@ namespace BusSchedule1
                 }
             }
 
+            Console.WriteLine("Day off pref: " + result);
+
             // Long rests
             for (byte j = 0; j < 11; j++)
             {
@@ -199,14 +209,18 @@ namespace BusSchedule1
                         {
                             gapsLength.Add(currentGapLength);
                             currentGapLength = 0;
-                        };
+                        }
+
+                        ;
                     }
                 }
 
                 if (currentGapLength > 0)
                 {
                     gapsLength.Add(currentGapLength);
-                };
+                }
+
+                ;
 
                 foreach (var gapLength in gapsLength)
                 {
@@ -218,13 +232,15 @@ namespace BusSchedule1
 
             }
 
+            Console.WriteLine("Long rest:" + result);
+
             // Early shift after late shift
 
             for (byte j = 0; j < 11; j++)
             {
                 for (byte i = 0; i < 14; i++)
                 {
-                    if (i<13 && Schedule[i, j, 1] != 0 && Schedule[i + 1, j, 0] != 0)
+                    if (i < 13 && Schedule[i, j, 1] != 0 && Schedule[i + 1, j, 0] != 0)
                     {
                         result -= 30;
                     }
@@ -232,8 +248,9 @@ namespace BusSchedule1
                 }
             }
 
+            Console.WriteLine("Early shift after late" + result);
+
             // Not scheduled night shift
-            //TODO: For every late shift assigned that is not equal to 4
 
             for (byte j = 0; j < 11; j++)
             {
@@ -257,6 +274,8 @@ namespace BusSchedule1
 
             }
 
+            Console.WriteLine("LAte shifts not equal 4: " + result);
+
             // More than 3 consequently late shifts
             for (byte j = 0; j < 11; j++)
             {
@@ -272,6 +291,10 @@ namespace BusSchedule1
                         {
                             i++;
                         }
+                        else
+                        {
+                            break;
+                        }
                     }
 
                     if (lateSum > 3)
@@ -282,11 +305,33 @@ namespace BusSchedule1
                 }
             }
 
+            Console.WriteLine("More than 3 consequently late shifts: " + result);
 
             return result;
         }
 
-        void FillInData()
+        public bool HasNotScheduledShifts {
+            get
+            {
+                for (int i = 0; i < 14; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        for (int k = 0; k < 2; k++)
+                        {
+                            if (this.AvailableShifts[i, j, k] == 1)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+    }
+
+    void FillInData()
         {
             DriverAbilities.Add(1, new byte[] { 3 });
             DriverAbilities.Add(2, new byte[] { 3 });
