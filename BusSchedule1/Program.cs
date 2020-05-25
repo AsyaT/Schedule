@@ -231,17 +231,16 @@ namespace BusSchedule1
                         }
                         else
                         {
+                            if (state.Schedule[i, j, k] != 0)
+                            {
+                                Console.ForegroundColor = ConsoleColor.White;
+                            }
                             if (state.IsPrefToWork((byte)(j+1),(byte)(i+1), (byte)k))
                             {
                                 Console.BackgroundColor = ConsoleColor.Yellow;
                                 Console.ForegroundColor = ConsoleColor.Black;
                             }
-
-                            if (state.Schedule[i, j, k] != 0)
-                            {
-                                Console.ForegroundColor = ConsoleColor.White;
-                            }
-
+                            
                             Console.Write(state.Schedule[i, j, k] + " ");
 
                             Console.BackgroundColor = ConsoleColor.Black;
